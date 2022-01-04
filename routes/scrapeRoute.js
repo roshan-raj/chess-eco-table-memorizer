@@ -14,8 +14,15 @@ const exceptionMessage = "Something went wrong, Please try again!";
  */
 app.get('/', async (req, res) => {
     try {
-        const scrapeChessDataResult = await scrapeChessData();
         res.type('application/json');
+        if ('scrapedData' in req.session === true)
+            return res.status(200).send(JSON.stringify(req.session.scrapedData, null, 2));
+
+        const scrapeChessDataResult = await scrapeChessData();
+        /**
+         * @description Store the response in the session.
+         */
+        req.session['scrapedData'] = scrapeChessDataResult;
         return res.status(200).send(JSON.stringify(scrapeChessDataResult, null, 2));
     } catch (exception) {
         return res.status(500).send(JSON.stringify(exceptionMessage, null, 2));
@@ -34,11 +41,33 @@ app.get('/:moveCode/', async (req, res) => {
         const moveCode = (req.params.moveCode).toUpperCase();
         res.type('application/json');
 
-        const scrapeChessDataResult = await scrapeChessData();
+        /**
+         * @description If the particular moveCode is already queried and is available in session,
+         * return the data from the sesson.
+         */
+        if ('moveDetails' in req.session === true && req.session.moveDetails.moveCode === moveCode)
+            return res.status(200).send(JSON.stringify(req.session.moveDetails, null, 2));
+
+        let scrapeChessDataResult;
+
+        /**
+         * @description If the scrapedData is already present, fetch it from the session,
+         * else scrape a fresh copy.
+         */
+        if ('scrapedData' in req.session === true)
+            scrapeChessDataResult = req.session.scrapedData;
+        else
+            scrapeChessDataResult = await scrapeChessData();
+
         const moveDetails = await getMoveDetails(moveCode, scrapeChessDataResult);
 
         if (moveDetails === false)
             return res.status(404).send(JSON.stringify("Move code not found!", null, 2));
+
+        /**
+         * @description Store the response in session object, for faster query.
+         */
+        req.session['moveDetails'] = moveDetails
 
         return res.status(200).send(JSON.stringify(moveDetails, null, 2));
     } catch (exception) {
