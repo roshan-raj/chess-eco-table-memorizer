@@ -1,0 +1,11 @@
+{
+  "name": "chess-eco-table-memorizer",
+  "version": "1.0.0",
+  "description": "Backend which memorizes chess moves. ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Roshan Raj",
+  "license": "ISC"
+}
