@@ -4,8 +4,8 @@
   "description": "Backend which memorizes chess moves. ",
   "main": "index.js",
   "scripts": {
-    "start": "pm2 start ./bin/www --name chess-eco-table-memorizer -- production",
-    "start:local": "set NODE_ENV=development&&nodemon ./bin/www",
+    "start": "pm2 start ./bin/www --name chess-eco-table-memorizer",
+    "start:local": "nodemon ./bin/www",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Roshan Raj",
