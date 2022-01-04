@@ -83,7 +83,8 @@ app.get(/^\/((?:[^\/]+\/?)+)\//, async (req, res) => {
 
         let paramsArray = req.params[0].split('/'); //[ 'A01', 'e4', 'r5', 't6', 'y7' ]
         const moveCode = (paramsArray[0]).toUpperCase();
-        paramsArray.shift()
+
+        paramsArray.shift() // Remove the moveCode and only retain the moves.
         let subsequentMoves = paramsArray;
       
         let scrapeChessDataResult;
@@ -107,8 +108,12 @@ app.get(/^\/((?:[^\/]+\/?)+)\//, async (req, res) => {
          */
         req.session['moveDetails'] = moveDetails
 
-        let actualMoveSequence = moveDetails.move;
-        actualMoveSequence = await parseMoveStringToArray(actualMoveSequence);
+        let actualMoveSequence = moveDetails.move; // This is the move sequence from the website.
+        actualMoveSequence = await parseMoveStringToArray(actualMoveSequence); // Each move is convert to an array element.
+        
+        /**
+         * @description Check if the input moves are in correct order.
+         */
         const validateProperMoveSequenceResult = await validateProperMoveSequence(subsequentMoves, actualMoveSequence);
         if (validateProperMoveSequenceResult === false)
             return res.status(400).send(JSON.stringify("Invalid moves!", null, 2));

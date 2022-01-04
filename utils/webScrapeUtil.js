@@ -74,7 +74,6 @@ const validateProperMoveSequence = async (inputMoveSequence, actualMoveSequence)
             for (let i = 0; i < inputMoveSequence.length; i++) {
                 const actualMove = actualMoveSequence[i];
                 const inputMove = inputMoveSequence[i];
-                console.log(actualMove + " " + inputMove)
                 if (actualMove != inputMove)
                     return resolve(false)
             }
@@ -95,11 +94,14 @@ const parseMoveStringToArray = async (moveString) => {
             movesArray.shift();
             let newMovesArray = [];
             for (let index = 0; index < movesArray.length; index++) {
-                const move = movesArray[index];
+                let move = movesArray[index];
+
+                // Few of the records have comma, remove them.
+                move = move.replace(',', '');
+
                 if (parseInt(move) != move)
                     newMovesArray.push(move);
             }
-
             return resolve(newMovesArray);
         } catch (exception) {
             return reject(exception)
