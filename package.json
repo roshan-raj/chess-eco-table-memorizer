@@ -4,7 +4,7 @@
   "description": "Backend which memorizes chess moves. ",
   "main": "index.js",
   "scripts": {
-    "start": "pm2 start ./bin/www --name chess-eco-table-memorizer",
+    "start": "node ./bin/www",
     "stop": "pm2 stop chess-eco-table-memorizer",
     "delete": "pm2 delete chess-eco-table-memorizer",
     "start:local": "nodemon ./bin/www",
