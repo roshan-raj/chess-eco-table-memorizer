@@ -68,7 +68,67 @@ const getMoveDetails = async (moveCode, chessDataArray) => {
 
 //==============================================================================
 
+const validateProperMoveSequence = async (inputMoveSequence, actualMoveSequence) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            for (let i = 0; i < inputMoveSequence.length; i++) {
+                const actualMove = actualMoveSequence[i];
+                const inputMove = inputMoveSequence[i];
+                console.log(actualMove + " " + inputMove)
+                if (actualMove != inputMove)
+                    return resolve(false)
+            }
+            return resolve(true)
+        } catch (exception) {
+            return reject(exception)
+        }
+    })
+}
+
+//==============================================================================
+
+const parseMoveStringToArray = async (moveString) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let movesArray = moveString.split(" ");
+            // Since all are opneing moves, it starts with time 1, hence removing it.
+            movesArray.shift();
+            let newMovesArray = [];
+            for (let index = 0; index < movesArray.length; index++) {
+                const move = movesArray[index];
+                if (parseInt(move) != move)
+                    newMovesArray.push(move);
+            }
+
+            return resolve(newMovesArray);
+        } catch (exception) {
+            return reject(exception)
+        }
+    })
+}
+
+//==============================================================================
+
+const getNextMove = async (inputMoveSequence, actualMoveSequence) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (inputMoveSequence.length === actualMoveSequence.length)
+                return resolve("No further moves available!");
+
+            const nextMove = actualMoveSequence[inputMoveSequence.length]
+            return resolve(nextMove)
+        } catch (exception) {
+            return reject(exception)
+        }
+    })
+}
+
+//==============================================================================
+
 module.exports = {
     scrapeChessData,
-    getMoveDetails
+    getMoveDetails,
+    validateProperMoveSequence,
+    parseMoveStringToArray,
+    getNextMove
 }

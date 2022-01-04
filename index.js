@@ -14,7 +14,7 @@ app.use(session({
         ttl: 1800000
     }),
     resave: false,
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'secret',
     saveUninitialized: true
 }))
 

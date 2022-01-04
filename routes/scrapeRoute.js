@@ -1,7 +1,7 @@
 var express = require('express');
 var app = express.Router();
 
-const { scrapeChessData, getMoveDetails } = require('../utils/webScrapeUtil')
+const { scrapeChessData, getMoveDetails, validateProperMoveSequence, parseMoveStringToArray, getNextMove } = require('../utils/webScrapeUtil')
 
 const exceptionMessage = "Something went wrong, Please try again!";
 
@@ -71,6 +71,52 @@ app.get('/:moveCode/', async (req, res) => {
 
         return res.status(200).send(JSON.stringify(moveDetails, null, 2));
     } catch (exception) {
+        return res.status(500).send(JSON.stringify(exceptionMessage, null, 2));
+    }
+});
+
+//==============================================================================
+
+app.get(/^\/((?:[^\/]+\/?)+)\//, async (req, res) => {
+    try {
+        res.type('application/json');
+
+        let paramsArray = req.params[0].split('/'); //[ 'A01', 'e4', 'r5', 't6', 'y7' ]
+        const moveCode = (paramsArray[0]).toUpperCase();
+        paramsArray.shift()
+        let subsequentMoves = paramsArray;
+      
+        let scrapeChessDataResult;
+
+        /**
+         * @description If the scrapedData is already present, fetch it from the session,
+         * else scrape a fresh copy.
+         */
+        if ('scrapedData' in req.session === true)
+            scrapeChessDataResult = req.session.scrapedData;
+        else
+            scrapeChessDataResult = await scrapeChessData();
+
+        const moveDetails = await getMoveDetails(moveCode, scrapeChessDataResult);
+
+        if (moveDetails === false)
+            return res.status(404).send(JSON.stringify("Move code not found!", null, 2));
+
+        /**
+         * @description Store the response in session object, for faster query.
+         */
+        req.session['moveDetails'] = moveDetails
+
+        let actualMoveSequence = moveDetails.move;
+        actualMoveSequence = await parseMoveStringToArray(actualMoveSequence);
+        const validateProperMoveSequenceResult = await validateProperMoveSequence(subsequentMoves, actualMoveSequence);
+        if (validateProperMoveSequenceResult === false)
+            return res.status(400).send(JSON.stringify("Invalid moves!", null, 2));
+
+        const getNextMoveResult = await getNextMove(subsequentMoves, actualMoveSequence);
+        return res.status(200).send(JSON.stringify(getNextMoveResult, null, 2));
+    } catch (exception) {
+        console.log(exception)
         return res.status(500).send(JSON.stringify(exceptionMessage, null, 2));
     }
 });
