@@ -1,7 +1,7 @@
 var express = require('express');
 var app = express.Router();
 
-const { scrapeChessData } = require('../utils/webScrapeUtil')
+const { scrapeChessData, getMoveDetails } = require('../utils/webScrapeUtil')
 
 const exceptionMessage = "Something went wrong, Please try again!";
 
@@ -16,22 +16,33 @@ app.get('/', async (req, res) => {
     try {
         const scrapeChessDataResult = await scrapeChessData();
         res.type('application/json');
-        res.status(200).send(JSON.stringify(scrapeChessDataResult, null, 2));
+        return res.status(200).send(JSON.stringify(scrapeChessDataResult, null, 2));
     } catch (exception) {
-        res.status(500).send(JSON.stringify(exceptionMessage, null, 2));
+        return res.status(500).send(JSON.stringify(exceptionMessage, null, 2));
     }
 });
 
 //==============================================================================
-
-app.get('/:moveCode', async (req, res) => {
+/**
+ * @description Get the opening move details from the code.
+ * 
+ * @author Roshan Raj
+ * @since 04-01-2022
+ */
+app.get('/:moveCode/', async (req, res) => {
     try {
         const moveCode = (req.params.moveCode).toUpperCase();
-        const scrapeChessDataResult = await scrapeChessData();
         res.type('application/json');
-        res.status(200).send(JSON.stringify(scrapeChessDataResult, null, 2));
+
+        const scrapeChessDataResult = await scrapeChessData();
+        const moveDetails = await getMoveDetails(moveCode, scrapeChessDataResult);
+
+        if (moveDetails === false)
+            return res.status(404).send(JSON.stringify("Move code not found!", null, 2));
+
+        return res.status(200).send(JSON.stringify(moveDetails, null, 2));
     } catch (exception) {
-        res.status(500).send(JSON.stringify(exceptionMessage, null, 2));
+        return res.status(500).send(JSON.stringify(exceptionMessage, null, 2));
     }
 });
 
